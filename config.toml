@@ -1,0 +1,11 @@
+[theme]
+# General Theme Settings
+base="light"                   # Ensures a clean, bright Light Mode start
+font="sans serif"              # High-quality, clean font (e.g., Arial/Helvetica equivalent)
+
+# Custom Colors for a Premium, High-Contrast Look
+primaryColor="#0069d9"         # A darker, more sophisticated Blue for accents
+backgroundColor="#f9f9f9"      # Off-White background (less stark than pure white)
+secondaryBackgroundColor="#ededf2" # Light, professional gray for sidebar/widgets
+textColor="#0d0d0d"            # Extremely dark text for high contrast (clean look)
+font="sans serif"              # Setting font again for clarity
