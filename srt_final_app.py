@@ -1,4 +1,4 @@
-# Version 7.1: FINAL STABLE CODE - FIXING CRASH ON LOAD
+# Version 7.1: FINAL Final STABLE CODE - FIXING CRASH ON LOAD
 import streamlit as st
 import assemblyai as aai
 import os
@@ -178,3 +178,4 @@ if uploaded_file is not None:
 
         # Clean up the temporary file
         os.remove(temp_file_path)
+
