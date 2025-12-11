@@ -1,3 +1,4 @@
+# Version 3.0: Final Launch Attempt
 # Force Streamlit to recognize this is a new file version
 import streamlit as st
 import assemblyai as aai
@@ -103,3 +104,4 @@ if uploaded_file is not None:
         # Clean up the temporary file
 
         os.remove(temp_file_path)
+
