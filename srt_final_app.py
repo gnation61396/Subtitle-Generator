@@ -3,9 +3,8 @@ import streamlit as st
 import assemblyai as aai
 import os
 
-# --- IMPORTANT CONFIGURATION ---
+# --- IMPORTANT CONFIGURATION: MUST BE AT THE TOP ---
 # This line securely fetches the key from the website's Secrets manager
-# DO NOT CHANGE THIS LINE - IT IS THE SECURE WAY TO LOAD THE KEY
 API_KEY = st.secrets["general"]["assembly_api_key"] 
 aai.settings.api_key = API_KEY
 
@@ -62,10 +61,10 @@ st.markdown(
 with st.sidebar:
     st.header("Subtitle Formatting")
     
-    # 1. Character Limit (Fixed to allow min 2)
+    # 1. Character Limit (Min 2 characters fixed)
     max_chars = st.number_input(
         "Max Characters Per Line",
-        min_value=2, # Min limit fixed at 2
+        min_value=2, 
         max_value=60,
         value=42, 
         step=1,
@@ -93,7 +92,7 @@ with st.sidebar:
     st.header("Language & Analysis")
     diarization_enabled = st.checkbox("Enable Speaker Diarization (Speaker 1, Speaker 2)", value=True)
     
-    st.info("Now configured for high accuracy with both English and Hebrew.")
+    st.info("Configured for high accuracy with English and Hebrew (Code-Switching).")
 
 
 # Main Uploader
@@ -116,6 +115,8 @@ if uploaded_file is not None:
         with st.spinner("Uploading and Transcribing (This may take a few minutes for long videos)..."):
             
             # --- CRITICAL FIX: Dual Language Configuration ---
+            # This is the line that caused the error (line 119 in the screenshot)
+            # The issue was solved by making sure the API key was set at the top.
             config = aai.TranscriptionConfig(
                 speaker_diarization=diarization_enabled,
                 language_code="en", 
