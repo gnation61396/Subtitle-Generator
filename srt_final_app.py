@@ -119,10 +119,10 @@ if uploaded_file is not None:
             
             # --- CRITICAL FIX: Configuration is now safely created INSIDE the button block ---
             config = aai.TranscriptionConfig(
-                speaker_diarization=diarization_enabled,
-                language_code="en", 
-                language_codes=["he", "en"] # Enable code-switching for Hebrew and English
-            )
+    speaker_labels=diarization_enabled,
+    # For English + Hebrew code switching:
+    language_codes=["en", "he"]  # one of them must be "en"
+)
             
             # Call the service
             transcript = transcriber.transcribe(temp_file_path, config=config)
@@ -181,6 +181,7 @@ if uploaded_file is not None:
 
         # Clean up the temporary file
         os.remove(temp_file_path)
+
 
 
 
