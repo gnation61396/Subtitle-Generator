@@ -8,6 +8,9 @@ import os
 API_KEY = st.secrets["general"]["assembly_api_key"] 
 aai.settings.api_key = API_KEY
 
+# Set default values for variables used early by the interpreter
+diarization_enabled = True
+max_chars = 42
 
 # --- STREAMLIT APP UI & DESIGN ---
 st.set_page_config(page_title="Pro Subtitle Generator", layout="wide")
@@ -178,5 +181,6 @@ if uploaded_file is not None:
 
         # Clean up the temporary file
         os.remove(temp_file_path)
+
 
 
