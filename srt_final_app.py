@@ -24,7 +24,7 @@ with st.sidebar:
     # 1. Character Limit (Fixed to allow min 14)
     max_chars = st.number_input(
         "Max Characters Per Line",
-        min_value=14, # <--- FIX: Changed min value to 14
+        min_value=2, # <--- FIX: Changed min value to 14
         max_value=60,
         value=42, 
         step=1,
@@ -141,3 +141,4 @@ if uploaded_file is not None:
 
         # Clean up the temporary file
         os.remove(temp_file_path)
+
