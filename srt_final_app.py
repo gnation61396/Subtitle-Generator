@@ -1,48 +1,69 @@
-# Version 3.0: Final Launch Attempt
-# Force Streamlit to recognize this is a new file version
+# Force Streamlit to recognize this is a new file version (4.0)
 import streamlit as st
 import assemblyai as aai
 import os
 
 # --- IMPORTANT CONFIGURATION ---
-# 1. PASTE YOUR ASSEMBLYAI API KEY HERE
-# This key is a simple text string, not a JSON file.
-API_KEY = "YOUR_ASSEMBLYAI_API_KEY_HERE" 
+# This line securely fetches the key from the website's Secrets manager
+API_KEY = st.secrets["general"]["assembly_api_key"]
+aai.settings.api_key = API_KEY
 
-# --- STREAMLIT APP UI ---
+
+# --- STREAMLIT APP UI & DESIGN ---
 st.set_page_config(page_title="Pro Subtitle Generator", layout="wide")
-st.title("🎬 Single-Step Subtitle Generator (AssemblyAI)")
+
+st.title("🎬 Professional Subtitle Generator (AssemblyAI)")
 st.markdown("---")
 
 # --- INPUT AND SETTINGS ---
 
 # Sidebar for professional settings
 with st.sidebar:
-    st.header("Subtitle Settings")
+    st.header("Subtitle Formatting")
     
-    # Character Limit (Professional Requirement)
+    # 1. Character Limit (Fixed to allow min 14)
     max_chars = st.number_input(
         "Max Characters Per Line",
-        min_value=30,
+        min_value=14, # <--- FIX: Changed min value to 14
         max_value=60,
-        value=42, # Standard YouTube/Netflix character limit
+        value=42, 
         step=1,
-        help="Controls how long each line of text can be before wrapping."
+        help="Sets the maximum number of characters allowed on one line of text."
     )
     
-    # Line Count (Professional Requirement)
+    # 2. Line Count
     max_lines = st.radio(
         "Max Lines Per Block",
         options=[1, 2],
         index=1,
-        help="Controls whether captions are split into 1 or 2 lines."
+        help="Select 1 or 2 lines per subtitle block."
     )
     
-    # Language/Code-Switching Settings (AssemblyAI handles this in the API)
+    # 3. Subtitle Gap/Spacing (Required by editors for clean cuts)
+    subtitle_gap_ms = st.number_input(
+        "Min Subtitle Gap (milliseconds)",
+        min_value=0,
+        max_value=1000,
+        value=200, # 200ms is a standard gap (0.2 seconds)
+        step=50,
+        help="The minimum time (in milliseconds) required between one subtitle ending and the next one starting."
+    )
+
     st.header("Language & Diarization")
     diarization_enabled = st.checkbox("Enable Speaker Diarization (Speaker 1, Speaker 2)", value=True)
     
     st.info("AssemblyAI automatically handles multiple languages and code-switching.")
+    
+    # --- Design Update (From config.toml theme) ---
+    st.markdown("""
+        <style>
+            .stButton>button {
+                background-color: #007bff;
+                color: white;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
 
 # Main Uploader
 uploaded_file = st.file_uploader("Upload Video/Audio File (.mp4, .mov, .wav)", type=["mp4", "mov", "wav", "mp3"])
@@ -51,10 +72,10 @@ if uploaded_file is not None:
     
     st.subheader("1. Start Transcription")
     
-    if st.button("Generate Timed SRT"):
+    # Button to start the process
+    if st.button("Generate Timed Captions"):
         
         # --- Transcription Process ---
-        aai.settings.api_key = API_KEY
         transcriber = aai.Transcriber()
         
         # Save file to a temporary location for the transcriber
@@ -77,28 +98,46 @@ if uploaded_file is not None:
             st.error(f"Transcription failed: {transcript.error}")
         else:
             
-            st.subheader("2. Download Final SRT File")
+            st.subheader("2. Download Files")
             
-            # Use the built-in function to generate SRT with line/character limits
+            # --- Subtitle Generation ---
+            
+            # Subtitle Gap (converted from ms to seconds for the function)
+            subtitle_gap_seconds = subtitle_gap_ms / 1000.0
+
+            # 1. Generate SRT File
             srt_content = transcript.export_subtitles_srt(
                 chars_per_caption=max_chars,
-                # AssemblyAI handles max_lines implicitly with the chars_per_caption logic
-                # For 1 line, use a high char count. For 2 lines, use a medium one (like 42).
+                max_lines=max_lines,
+                subtitle_gap=subtitle_gap_seconds 
             )
             
-            st.success("SRT generated successfully. Download and import into Premiere Pro.")
+            # 2. Generate VTT File (For web players/YouTube)
+            vtt_content = transcript.export_subtitles_vtt(
+                chars_per_caption=max_chars,
+                max_lines=max_lines,
+                subtitle_gap=subtitle_gap_seconds 
+            )
+
+            st.success("Captions generated successfully. Download and import into Premiere Pro or web players.")
             
-            # Download Button
+            # Download Button: SRT
             st.download_button(
-                label="Download transcript.srt",
+                label="Download SRT File (Premiere Pro)",
                 data=srt_content,
                 file_name="transcript.srt",
                 mime="application/x-subrip",
-                help="Imports directly into Premiere Pro with all timings."
+                key="srt_download"
             )
             
+            # Download Button: VTT
+            st.download_button(
+                label="Download VTT File (Web Players/YouTube)",
+                data=vtt_content,
+                file_name="transcript.vtt",
+                mime="text/vtt",
+                key="vtt_download"
+            )
+
         # Clean up the temporary file
-
         os.remove(temp_file_path)
-
-
